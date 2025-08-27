@@ -1,9 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { API_BASE_URL } from "../config";
 
-const url = `${API_BASE_URL}/api/images?folder=${encodeURIComponent(folder)}`;
-
-
 interface CloudinaryImage {
   public_id: string;
   secure_url: string;
@@ -18,14 +15,14 @@ interface UseCloudinaryReturn {
   loading: boolean;
   error: string | null;
   refetch: () => void;
-  clearCache: () => void; // 👈 NEW: Xóa cache thủ công
+  clearCache: () => void;
 }
 
 // 📦 Cache configuration
 const CACHE_DURATION = 30 * 60 * 1000; // 30 phút
-const API_CALL_LIMIT = 50; // 👈 Giảm từ 100 xuống 50
+const API_CALL_LIMIT = 50;
 
-// 📊 Track API calls (để debug)
+// 📊 Track API calls
 let apiCallCount = 0;
 
 const useCloudinary = (folder?: string): UseCloudinaryReturn => {
@@ -33,9 +30,9 @@ const useCloudinary = (folder?: string): UseCloudinaryReturn => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 🔑 Cache key dựa trên folder
-  const cacheKey = useMemo(() => 
-    folder ? `cloudinary_images_${folder.replace(/\//g, '_')}` : null, 
+  // 🔑 Cache key
+  const cacheKey = useMemo(
+    () => (folder ? `cloudinary_images_${folder.replace(/\//g, "_")}` : null),
     [folder]
   );
 
@@ -49,20 +46,22 @@ const useCloudinary = (folder?: string): UseCloudinaryReturn => {
 
       if (cachedData && cachedTimestamp) {
         const age = Date.now() - parseInt(cachedTimestamp);
-        
+
         if (age < CACHE_DURATION) {
-          console.log(`📦 Cache HIT for folder: ${folder} (age: ${Math.round(age/1000/60)}min)`);
+          console.log(
+            `📦 Cache HIT for folder: ${folder} (age: ${Math.round(age / 1000 / 60)}min)`
+          );
           return JSON.parse(cachedData);
         } else {
-          console.log(`⏰ Cache EXPIRED for folder: ${folder} (age: ${Math.round(age/1000/60)}min)`);
-          // Xóa cache hết hạn
+          console.log(
+            `⏰ Cache EXPIRED for folder: ${folder} (age: ${Math.round(age / 1000 / 60)}min)`
+          );
           localStorage.removeItem(cacheKey);
           localStorage.removeItem(`${cacheKey}_timestamp`);
         }
       }
     } catch (err) {
-      console.warn('❌ Cache read error:', err);
-      // Xóa cache lỗi
+      console.warn("❌ Cache read error:", err);
       if (cacheKey) {
         localStorage.removeItem(cacheKey);
         localStorage.removeItem(`${cacheKey}_timestamp`);
@@ -73,33 +72,36 @@ const useCloudinary = (folder?: string): UseCloudinaryReturn => {
   }, [cacheKey, folder]);
 
   // 💾 Set cached data
-  const setCachedData = useCallback((data: CloudinaryImage[]) => {
-    if (!cacheKey || !data.length) return;
+  const setCachedData = useCallback(
+    (data: CloudinaryImage[]) => {
+      if (!cacheKey || !data.length) return;
 
-    try {
-      localStorage.setItem(cacheKey, JSON.stringify(data));
-      localStorage.setItem(`${cacheKey}_timestamp`, Date.now().toString());
-      console.log(`💾 Cached ${data.length} images for folder: ${folder}`);
-    } catch (err) {
-      console.warn('❌ Cache write error:', err);
-      // Có thể do localStorage full, thử xóa cache cũ
-      if (err instanceof Error && err.name === 'QuotaExceededError') {
-        console.log('🧹 Clearing old cache due to storage full');
-        clearOldCache();
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify(data));
+        localStorage.setItem(`${cacheKey}_timestamp`, Date.now().toString());
+        console.log(`💾 Cached ${data.length} images for folder: ${folder}`);
+      } catch (err) {
+        console.warn("❌ Cache write error:", err);
+        if (err instanceof Error && err.name === "QuotaExceededError") {
+          console.log("🧹 Clearing old cache due to storage full");
+          clearOldCache();
+        }
       }
-    }
-  }, [cacheKey, folder]);
+    },
+    [cacheKey, folder]
+  );
 
-  // 🧹 Clear old cache entries
+  // 🧹 Clear old cache
   const clearOldCache = () => {
     const keys = Object.keys(localStorage);
-    const cloudinaryKeys = keys.filter(key => key.startsWith('cloudinary_images_'));
-    
-    // Xóa những cache cũ nhất
-    cloudinaryKeys.forEach(key => {
+    const cloudinaryKeys = keys.filter((key) =>
+      key.startsWith("cloudinary_images_")
+    );
+
+    cloudinaryKeys.forEach((key) => {
       const timestampKey = `${key}_timestamp`;
       const timestamp = localStorage.getItem(timestampKey);
-      
+
       if (timestamp) {
         const age = Date.now() - parseInt(timestamp);
         if (age > CACHE_DURATION) {
@@ -111,75 +113,75 @@ const useCloudinary = (folder?: string): UseCloudinaryReturn => {
     });
   };
 
-  // 🌐 Fetch images từ API
-  const fetchImages = useCallback(async (useCache = true) => {
-    // ❌ Không fetch nếu folder undefined/empty
-    if (folder === undefined || folder === '') {
-      setImages([]);
-      setError(null);
-      return;
-    }
-
-    // 📦 Kiểm tra cache trước khi gọi API
-    if (useCache) {
-      const cachedImages = getCachedData();
-      if (cachedImages) {
-        setImages(cachedImages);
+  // 🌐 Fetch images
+  const fetchImages = useCallback(
+    async (useCache = true) => {
+      if (!folder) {
+        setImages([]);
         setError(null);
-        return; // 👈 RETURN sớm = KHÔNG gọi API = TIẾT KIỆM quota!
-      }
-    }
-
-    // 🚦 Track API calls
-    apiCallCount++;
-    console.log(`🌐 API Call #${apiCallCount} - Folder: ${folder}`);
-
-    setLoading(true);
-    setError(null);
-
-    try {      
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        if (response.status === 420) {
-          throw new Error('Rate Limit Exceeded! Chờ đến 17h mai để reset quota.');
-        }
-        throw new Error(`HTTP error! status: ${response.status}`);
+        return;
       }
 
-      const data = await response.json();
-      const imagesData = data.resources || data || [];
-
-      setImages(imagesData);
-      
-      // 💾 Cache kết quả nếu có data
-      if (imagesData.length > 0) {
-        setCachedData(imagesData);
-      }
-
-      console.log(`✅ Loaded ${imagesData.length} images for folder: ${folder}`);
-
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      console.error('❌ Fetch error:', errorMessage);
-      setError(errorMessage);
-
-      // 🆘 Nếu lỗi rate limit, thử dùng cache cũ (stale cache)
-      if (errorMessage.includes('Rate Limit')) {
-        const staleCache = getCachedData();
-        if (staleCache) {
-          console.log('⚠️ Using stale cache due to rate limit');
-          setImages(staleCache);
-          setError('Using cached data (API limit reached)');
+      // 📦 Cache first
+      if (useCache) {
+        const cachedImages = getCachedData();
+        if (cachedImages) {
+          setImages(cachedImages);
+          setError(null);
           return;
         }
       }
-      
-      setImages([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [folder, getCachedData, setCachedData]);
+
+      apiCallCount++;
+      console.log(`🌐 API Call #${apiCallCount} - Folder: ${folder}`);
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const url = `${API_BASE_URL}/api/images?folder=${encodeURIComponent(folder)}`;
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          if (response.status === 420) {
+            throw new Error("Rate Limit Exceeded! Chờ đến 17h mai để reset quota.");
+          }
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const imagesData: CloudinaryImage[] = data.resources || data || [];
+
+        setImages(imagesData);
+
+        if (imagesData.length > 0) {
+          setCachedData(imagesData);
+        }
+
+        console.log(`✅ Loaded ${imagesData.length} images for folder: ${folder}`);
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Unknown error";
+        console.error("❌ Fetch error:", errorMessage);
+        setError(errorMessage);
+
+        if (errorMessage.includes("Rate Limit")) {
+          const staleCache = getCachedData();
+          if (staleCache) {
+            console.log("⚠️ Using stale cache due to rate limit");
+            setImages(staleCache);
+            setError("Using cached data (API limit reached)");
+            return;
+          }
+        }
+
+        setImages([]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [folder, getCachedData, setCachedData]
+  );
 
   // 🗑️ Clear cache cho folder hiện tại
   const clearCache = useCallback(() => {
@@ -190,27 +192,28 @@ const useCloudinary = (folder?: string): UseCloudinaryReturn => {
     }
   }, [cacheKey, folder]);
 
-  // 🔄 Refetch = force fetch mới (bypass cache)
+  // 🔄 Refetch
   const refetch = useCallback(() => {
-    fetchImages(false); // useCache = false
+    fetchImages(false);
   }, [fetchImages]);
 
   // 🚀 Auto load khi folder thay đổi
   useEffect(() => {
-    if (folder && folder !== '') {
-      fetchImages(true); // useCache = true
+    if (folder) {
+      fetchImages(true);
     } else {
       setImages([]);
       setError(null);
     }
   }, [folder, fetchImages]);
 
-  return { 
-    images, 
-    loading, 
-    error, 
+  return {
+    images,
+    loading,
+    error,
     refetch,
-    clearCache 
+    clearCache,
   };
 };
+
 export default useCloudinary;

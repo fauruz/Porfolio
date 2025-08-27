@@ -3,35 +3,36 @@ import { useEffect } from 'react';
 export const useScrollSnap = () => {
   useEffect(() => {
     let isScrolling = false;
-    let scrollTimeout: NodeJS.Timeout;
+    let scrollTimeout: ReturnType<typeof setTimeout>;
 
-    const isInsideModal = (element: EventTarget) => {
-      return (element as HTMLElement).closest('.modal-backdrop') !== null;
+    const isInsideModal = (element: EventTarget | null): boolean => {
+      if (!(element instanceof HTMLElement)) return false;
+      return element.closest('.modal-backdrop') !== null;
     };
 
     const goToSection = (direction: number) => {
       if (isScrolling) return;
-      
+
       const currentPos = window.scrollY;
       const windowHeight = window.innerHeight;
       const sectionHeight = windowHeight;
       const currentSection = Math.round(currentPos / sectionHeight);
-      const totalSections = document.querySelectorAll('.screen').length;    
+      const totalSections = document.querySelectorAll('.screen').length;
+
       let targetSection: number;
-      
       if (direction > 0) {
-        targetSection = Math.min(currentSection + 1, totalSections);
+        targetSection = Math.min(currentSection + 1, totalSections - 1); // fix off-by-one
       } else {
         targetSection = Math.max(currentSection - 1, 0);
       }
-      
+
       isScrolling = true;
-      
+
       window.scrollTo({
         top: targetSection * sectionHeight,
-        behavior: 'smooth'
+        behavior: 'smooth',
       });
-      
+
       clearTimeout(scrollTimeout);
       scrollTimeout = setTimeout(() => {
         isScrolling = false;
@@ -39,33 +40,28 @@ export const useScrollSnap = () => {
     };
 
     const handleWheel = (e: WheelEvent) => {
-      // 👈 THÊM ĐIỀU KIỆN NÀY
-      if (isInsideModal(e.target)) {
-        return; // Không xử lý scroll nếu đang ở trong modal
-      }
-      
+      if (isInsideModal(e.target)) return;
       e.preventDefault();
       const direction = e.deltaY > 0 ? 1 : -1;
       goToSection(direction);
     };
 
     const handleTouchStart = (e: TouchEvent) => {
-      // 👈 THÊM ĐIỀU KIỆN NÀY
-      if (isInsideModal(e.target)) {
-        return;
-      }
-      
+      if (isInsideModal(e.target)) return;
+
       const touchStartY = e.touches[0].clientY;
-      (e.currentTarget as HTMLElement).setAttribute('data-touch-start', touchStartY.toString());
+      (e.currentTarget as HTMLElement).setAttribute(
+        'data-touch-start',
+        touchStartY.toString()
+      );
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
-      // 👈 THÊM ĐIỀU KIỆN NÀY
-      if (isInsideModal(e.target) || isScrolling) {
-        return;
-      }
-      
-      const touchStartY = parseInt((e.currentTarget as HTMLElement).getAttribute('data-touch-start') || '0');
+      if (isInsideModal(e.target) || isScrolling) return;
+
+      const touchStartY = parseInt(
+        (e.currentTarget as HTMLElement).getAttribute('data-touch-start') || '0'
+      );
       const touchEndY = e.changedTouches[0].clientY;
       const direction = touchEndY < touchStartY ? 1 : -1;
       goToSection(direction);
@@ -73,16 +69,16 @@ export const useScrollSnap = () => {
 
     const handleScroll = () => {
       if (isScrolling) return;
-      
+
       clearTimeout(scrollTimeout);
       scrollTimeout = setTimeout(() => {
         const currentPos = window.scrollY;
         const windowHeight = window.innerHeight;
         const currentSection = Math.round(currentPos / windowHeight);
-        
+
         window.scrollTo({
           top: currentSection * windowHeight,
-          behavior: 'smooth'
+          behavior: 'smooth',
         });
       }, 100);
     };
