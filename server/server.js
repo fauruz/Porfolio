@@ -90,3 +90,6 @@ app.get('/api/debug/:folder', async (req, res) => {
 
 // Khởi động server
 app.listen(PORT, () => console.log(`Server chạy tại http://localhost:${PORT}`));
+app.get("/", (req, res) => {
+  res.send("✅ Portfolio Backend is running!");
+});
