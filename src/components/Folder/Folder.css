@@ -1,0 +1,225 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;&display=swap');
+
+.folder-custom {
+  position: relative;
+  width: 90px;
+  height: 130px;
+  margin: 30px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Lớp 1 - cạnh nghiêng nhẹ */
+.layer-1 {
+  position: absolute;
+  width: 90%;
+  height: 100%;
+  z-index: 0;
+  top : 0;
+}
+
+.layer-1-body {
+  width: 100%;
+  height: calc(100% - 20px);
+  position: absolute;
+  top: 10px;
+  background: #FFD166;
+  border-left: 1px solid red;
+  border-right: 1px solid red;
+}
+
+.layer-1-top-edge,
+.layer-1-bottom-edge {
+  position: absolute;
+  width: 100%;
+  height: 20px;
+  background: #FFD166;
+  border-left: 1px solid red;
+  border-right: 1px solid red;  
+  transform: skewY(7deg);
+}
+
+.layer-1-top-edge {
+  top: 0;
+  border-top: 1px solid red;
+  border-top-right-radius: 15%;
+}
+
+.layer-1-bottom-edge {
+  bottom: 0;
+  height: 20px;
+  border-bottom: 1px solid red;
+  border-bottom-right-radius: 15%;
+}
+
+/* Lớp 2 - cạnh nghiêng mạnh hơn */
+.layer-2 {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top : 0;
+  margin-top: 6px;
+  z-index: 2;
+}
+
+.layer-2-body {
+  width: 30%;
+  height: calc(100% - 41px);
+  position: absolute;
+  top: 14px;
+  background: #FFD166;
+  border-left: 1px solid red;
+  border-right: 1px solid red;
+}
+
+.layer-2-top-edge,
+.layer-2-bottom-edge {
+  position: absolute;
+  width: 30%;
+  background: #FFD166;
+  border-left: 1px solid red;
+  border-right: 1px solid red;
+  transform: skewY(40deg);
+}
+
+.layer-2-top-edge {
+  top: 0;
+  height: 20px;
+  border-top: 1px solid red;
+  border-top-right-radius: 15%;
+}
+
+.layer-2-bottom-edge {
+  height: 40px;
+  bottom: 0;
+  border-bottom: 1px solid red;
+  border-bottom-right-radius: 15%;
+}
+
+/* ===== FOLDER HÌNH ẢNH ===== */
+.folder-image-container {
+  position: absolute;
+  width: 90%;
+  height: calc(100% - 20px);
+  top: 10px;
+  overflow: hidden;
+  z-index: 1; /* nằm giữa layer-1 và layer-2 */
+  transform: rotateX(7deg) rotateY(45deg);
+}
+
+.folder-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-left: 1px solid rgba(255,255,255,0.3);
+  border-right: 1px solid rgba(255,255,255,0.3);
+  border-top-right-radius: 5%;
+  border-bottom-right-radius: 5%;
+}
+
+/* ===== WRAPPER & TITLE ===== */
+.folder-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.folder-title {
+  font-size: 2rem;
+  color: #b74b4b;
+  margin-top: 1rem;
+}
+
+/* 👇 RESPONSIVE RIÊNG CHO FOLDER */
+@media (max-width: 1024px) {
+  .folder-custom {
+    width: 80px;
+    height: 115px;
+    margin: 25px;
+  }
+  
+  .folder-title {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .folder-custom {
+    width: 70px;
+    height: 100px;
+    margin: 20px;
+  }
+  
+  .layer-1-top-edge,
+  .layer-1-bottom-edge {
+    height: 18px;
+  }
+  
+  .layer-2-top-edge {
+    height: 18px;
+  }
+  
+  .layer-2-bottom-edge {
+    height: 35px;
+  }
+  
+  .folder-title {
+    font-size: 1.6rem;
+    margin-top: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .folder-custom {
+    width: 60px;
+    height: 85px;
+    margin: 15px;
+  }
+  
+  .layer-1-top-edge,
+  .layer-1-bottom-edge {
+    height: 15px;
+  }
+  
+  .layer-2-top-edge {
+    height: 15px;
+  }
+  
+  .layer-2-bottom-edge {
+    height: 30px;
+  }
+  
+  .folder-title {
+    font-size: 1.4rem;
+    margin-top: 0.6rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .folder-custom {
+    width: 50px;
+    height: 70px;
+    margin: 10px;
+  }
+  
+  .layer-1-top-edge,
+  .layer-1-bottom-edge {
+    height: 12px;
+  }
+  
+  .layer-2-top-edge {
+    height: 12px;
+  }
+  
+  .layer-2-bottom-edge {
+    height: 25px;
+  }
+  
+  .folder-title {
+    font-size: 1.2rem;
+    margin-top: 0.5rem;
+  }
+}

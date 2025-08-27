@@ -1,0 +1,361 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;&display=swap');
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: grid;
+  place-items: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.modal {
+  width: 90vw;
+  max-width: 1200px;
+  height: 80vh;
+  background: #111;
+  border: 1px solid rgba(183, 75, 75, 0.5);
+  border-radius: 1rem;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(183, 75, 75, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 3rem;
+  background: transparent;
+  border: none;
+  color: #b74b4b;
+  cursor: pointer;
+  line-height: 1;
+  z-index: 10;
+}
+
+.modal-body {
+  padding: 2rem;
+  overflow: auto;
+  color: #ccc;
+  flex: 1;
+  overscroll-behavior: contain;
+}
+
+/* Gallery Header */
+.gallery-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(183, 75, 75, 0.3);
+}
+
+.gallery-header h2 {
+  font-size: 2.4rem;
+  color: #b74b4b;
+  margin: 0;
+}
+
+/* Ẩn gallery-controls vì không dùng select folder nữa */
+.gallery-controls {
+  display: none;
+}
+
+/* Chỉ hiển thị nút refresh */
+.refresh-btn {
+  background: rgba(183, 75, 75, 0.2);
+  color: #b74b4b;
+  border: 1px solid #b74b4b;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.3s ease;
+}
+
+.refresh-btn:hover {
+  background: rgba(183, 75, 75, 0.3);
+}
+
+/* Loading State */
+.loading {
+  text-align: center;
+  padding: 3rem;
+  font-size: 1.2rem;
+  color: #b74b4b;
+}
+
+/* Error State */
+.error {
+  text-align: center;
+  padding: 2rem;
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.retry-btn {
+  background: rgba(255, 107, 107, 0.2);
+  color: #ff6b6b;
+  border: 1px solid #ff6b6b;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 1rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Empty State */
+.empty {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+  font-style: italic;
+}
+
+/* Image Grid */
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  will-change: transform;
+}
+
+.image-item {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #1a1a1a;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.image-item:hover {
+  transform: scale(1.02);
+}
+
+.image-skeleton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #2a2a2a 25%, #333 50%, #2a2a2a 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+.image-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.image-item:hover img {
+  transform: scale(1.05);
+}
+
+.image-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  cursor: pointer;
+}
+
+.image-overlay-content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-overlay-content img {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+/* Container cố định cho ảnh và nút */
+.image-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80vw;
+  height: 80vh;
+  background: #000; /* Khung đen cố định */
+}
+
+/* Nút mũi tên điều hướng - VỊ TRÍ CỐ ĐỊNH */
+.nav-arrow {
+  position: fixed; /* Sử dụng fixed thay vì absolute */
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(183, 75, 75, 0.5);
+  color: white;
+  border: none;
+  font-size: 2.5rem;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10001;
+}
+
+.nav-arrow:hover {
+  background: rgba(183, 75, 75, 0.8);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.nav-arrow-left {
+  left: 5%;
+}
+
+.nav-arrow-right {
+  right: 5%;
+}
+
+.close-overlay {
+  position: fixed;
+  top: 5%;
+  right: 5%;
+  background: rgba(183, 75, 75, 0.5);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  font-size: 2rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10001;
+  transition: all 0.3s ease;
+}
+
+.close-overlay:hover {
+  background: rgba(183, 75, 75, 0.8);
+  transform: scale(1.1);
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .modal {
+    width: 95vw;
+    height: 85vh;
+  }
+  
+  .modal-body {
+    padding: 1rem;
+  }
+  
+  .gallery-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .image-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 1rem;
+  }
+  
+  .gallery-header h2 {
+    font-size: 2rem;
+  }
+  
+  /* Điều chỉnh nút mũi tên cho mobile */
+  .nav-arrow {
+    width: 45px;
+    height: 45px;
+    font-size: 2rem;
+  }
+  
+  .nav-arrow-left {
+    left: 2%;
+  }
+  
+  .nav-arrow-right {
+    right: 2%;
+  }
+  
+  .close-overlay {
+    top: 2%;
+    right: 2%;
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+  }
+  
+  /* Container cho mobile */
+  .image-container {
+    width: 95vw;
+    height: 70vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .image-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.8rem;
+  }
+  
+  .gallery-header h2 {
+    font-size: 1.8rem;
+  }
+  
+  .refresh-btn {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+  
+  /* Điều chỉnh nút mũi tên cho màn hình nhỏ */
+  .nav-arrow {
+    width: 40px;
+    height: 40px;
+    font-size: 1.8rem;
+  }
+  
+  .nav-arrow-left {
+    left: 1%;
+  }
+  
+  .nav-arrow-right {
+    right: 1%;
+  }
+  
+  /* Container cho màn hình nhỏ */
+  .image-container {
+    width: 98vw;
+    height: 60vh;
+  }
+}
