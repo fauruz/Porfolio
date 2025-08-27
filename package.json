@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "description": "Personal Landing Page built with React",
   "main": "index.js",
+  "homepage": "https://fauruz.github.io/Porfolio",
   "scripts": {
     "start": "set PORT=3001 && webpack serve --mode development --open",
     "build": "webpack --mode production",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -38,6 +41,7 @@
     "style-loader": "^3.3.0",
     "webpack": "^5.88.0",
     "webpack-cli": "^5.1.0",
-    "webpack-dev-server": "^4.15.0"
+    "webpack-dev-server": "^4.15.0",
+    "gh-pages": "^6.0.0"
   }
 }
