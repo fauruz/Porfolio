@@ -1,4 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { API_BASE_URL } from "../config";
+
+const url = `${API_BASE_URL}/api/images?folder=${encodeURIComponent(folder)}`;
+
 
 interface CloudinaryImage {
   public_id: string;
@@ -133,9 +137,7 @@ const useCloudinary = (folder?: string): UseCloudinaryReturn => {
     setLoading(true);
     setError(null);
 
-    try {
-      const url = `http://localhost:3000/api/images?folder=${encodeURIComponent(folder)}`;
-      
+    try {      
       const response = await fetch(url);
       
       if (!response.ok) {
